@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>70/30 Game Boy Launcher Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0F380F;
+            color: #8BAC0F;
+            font-family: 'Press Start 2P', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .phone-frame {
+            width: 360px;
+            height: 640px;
+            background-color: #0F380F;
+            border: 12px solid #274927;
+            border-radius: 24px;
+            padding: 12px 14px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Top Section: ~70% of screen for larger apps and clock */
+        .top-screen-half {
+            flex: 2.3;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-bottom: 2px dashed #274927;
+            padding-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9BBC0F;
+            margin-bottom: 4px;
+        }
+
+        .clock-container {
+            font-size: 22px; /* Bigger clock */
+            color: #9BBC0F;
+            margin-bottom: 6px;
+        }
+
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            font-size: 13px; /* Larger app text */
+            cursor: pointer;
+            user-select: none;
+            padding: 3px 0;
+        }
+
+        .menu-item:hover {
+            color: #9BBC0F;
+            padding-left: 4px;
+        }
+
+        /* Bottom Section: ~30% for input and compact keypad/keyboard */
+        .bottom-keyboard-half {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-top: 8px;
+            box-sizing: border-box;
+        }
+
+        .command-bar {
+            background-color: #274927;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .command-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #9BBC0F;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            outline: none;
+        }
+
+        .command-input::placeholder {
+            color: #557755;
+        }
+
+        .toggle-btn {
+            background: #153115;
+            color: #9BBC0F;
+            border: none;
+            font-size: 8px;
+            padding: 4px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        /* Keyboards Grids (Compact for 30% footprint) */
+        .keyboard-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            background: #153115;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 2px;
+        }
+
+        .sim-key {
+            flex: 1;
+            background: #274927;
+            color: #9BBC0F;
+            font-size: 8px;
+            text-align: center;
+            padding: 6px 0;
+            border-radius: 2px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sim-key.space {
+            flex: 4;
+        }
+        
+        .sim-key:active {
+            background: #9BBC0F;
+            color: #0F380F;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        
+        <!-- TOP SECTION (~70%): Large Apps & Dashboard -->
+        <div class="top-screen-half">
+            <div class="top-bar">
+                <span id="statusBarClock">12:00</span>
+                <span id="batteryStatus">BAT: 84%</span>
+            </div>
+
+            <div class="clock-container" id="clock">12:00:00</div>
+
+            <div class="menu-list">
+                <div class="menu-item" onclick="alert('Launching Phone...')">PHONE</div>
+                <div class="menu-item" onclick="alert('Launching Messages...')">MESSAGES</div>
+                <div class="menu-item" onclick="alert('Launching Spotify...')">SPOTIFY</div>
+                <div class="menu-item" onclick="alert('Launching Weather...')">WEATHER</div>
+                <div class="menu-item" onclick="alert('Launching Maps...')">MAPS</div>
+                <div class="menu-item" onclick="alert('Launching Camera...')">CAMERA</div>
+                <div class="menu-item" onclick="alert('Launching Settings...')">SETTINGS</div>
+            </div>
+        </div>
+
+        <!-- BOTTOM SECTION (~30%): Compact Dynamic Input Zone -->
+        <div class="bottom-keyboard-half">
+            <div class="command-bar">
+                <input type="text" id="cmdInput" class="command-input" placeholder="Dial or type..." autofocus oninput="checkInputMode()">
+                <button class="toggle-btn" id="toggleBtn" onclick="manualToggleKeyboard()">ABC</button>
+            </div>
+
+            <!-- NUMBER PAD (Default Homepage View) -->
+            <div id="numpadPanel" class="keyboard-panel">
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('1')">1</div>
+                    <div class="sim-key" onclick="typeKey('2')">2 ABC</div>
+                    <div class="sim-key" onclick="typeKey('3')">3 DEF</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('4')">4 GHI</div>
+                    <div class="sim-key" onclick="typeKey('5')">5 JKL</div>
+                    <div class="sim-key" onclick="typeKey('6')">6 MNO</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('7')">7 PQRS</div>
+                    <div class="sim-key" onclick="typeKey('8')">8 TUV</div>
+                    <div class="sim-key" onclick="typeKey('9')">9 WXYZ</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('*')">*</div>
+                    <div class="sim-key" onclick="typeKey('0')">0+</div>
+                    <div class="sim-key" onclick="typeKey('#')">#</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key space" onclick="callNumber()">CALL / ENTER</div>
+                    <div class="sim-key" onclick="backspace()">⌫</div>
+                </div>
+            </div>
+
+            <!-- FULL QWERTY KEYBOARD (Swaps when typing letters) -->
+            <div id="qwertyPanel" class="keyboard-panel hidden">
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('q')">Q</div>
+                    <div class="sim-key" onclick="typeKey('w')">W</div>
+                    <div class="sim-key" onclick="typeKey('e')">E</div>
+                    <div class="sim-key" onclick="typeKey('r')">R</div>
+                    <div class="sim-key" onclick="typeKey('t')">T</div>
+                    <div class="sim-key" onclick="typeKey('y')">Y</div>
+                    <div class="sim-key" onclick="typeKey('u')">U</div>
+                    <div class="sim-key" onclick="typeKey('i')">I</div>
+                    <div class="sim-key" onclick="typeKey('o')">O</div>
+                    <div class="sim-key" onclick="typeKey('p')">P</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('a')">A</div>
+                    <div class="sim-key" onclick="typeKey('s')">S</div>
+                    <div class="sim-key" onclick="typeKey('d')">D</div>
+                    <div class="sim-key" onclick="typeKey('f')">F</div>
+                    <div class="sim-key" onclick="typeKey('g')">G</div>
+                    <div class="sim-key" onclick="typeKey('h')">H</div>
+                    <div class="sim-key" onclick="typeKey('j')">J</div>
+                    <div class="sim-key" onclick="typeKey('k')">K</div>
+                    <div class="sim-key" onclick="typeKey('l')">L</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key" onclick="typeKey('z')">Z</div>
+                    <div class="sim-key" onclick="typeKey('x')">X</div>
+                    <div class="sim-key" onclick="typeKey('c')">C</div>
+                    <div class="sim-key" onclick="typeKey('v')">V</div>
+                    <div class="sim-key" onclick="typeKey('b')">B</div>
+                    <div class="sim-key" onclick="typeKey('n')">N</div>
+                    <div class="sim-key" onclick="typeKey('m')">M</div>
+                    <div class="sim-key" onclick="backspace()">⌫</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="sim-key space" onclick="typeKey(' ')">SPACE</div>
+                    <div class="sim-key" onclick="submitText()">↵</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let isQwertyMode = false;
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('statusBarClock').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function typeKey(char) {
+            const input = document.getElementById('cmdInput');
+            input.value += char;
+            input.focus();
+            checkInputMode();
+        }
+
+        function backspace() {
+            const input = document.getElementById('cmdInput');
+            input.value = input.value.slice(0, -1);
+            input.focus();
+            checkInputMode();
+        }
+
+        function checkInputMode() {
+            const val = document.getElementById('cmdInput').value;
+            const hasLetters = /[a-zA-Z]/.test(val);
+            if (hasLetters && !isQwertyMode) {
+                isQwertyMode = true;
+                document.getElementById('numpadPanel').classList.add('hidden');
+                document.getElementById('qwertyPanel').classList.remove('hidden');
+                document.getElementById('toggleBtn').innerText = '123';
+            } else if (!hasLetters && isQwertyMode && val === '') {
+                isQwertyMode = false;
+                document.getElementById('qwertyPanel').classList.add('hidden');
+                document.getElementById('numpadPanel').classList.remove('hidden');
+                document.getElementById('toggleBtn').innerText = 'ABC';
+            }
+        }
+
+        function manualToggleKeyboard() {
+            isQwertyMode = !isQwertyMode;
+            const numpad = document.getElementById('numpadPanel');
+            const qwerty = document.getElementById('qwertyPanel');
+            const btn = document.getElementById('toggleBtn');
+
+            if (isQwertyMode) {
+                numpad.classList.add('hidden');
+                qwerty.classList.remove('hidden');
+                btn.innerText = '123';
+            } else {
+                qwerty.classList.add('hidden');
+                numpad.classList.remove('hidden');
+                btn.innerText = 'ABC';
+            }
+        }
+
+        function callNumber() {
+            const input = document.getElementById('cmdInput');
+            if (input.value.trim() !== '') {
+                alert('Dialing number: ' + input.value);
+                input.value = '';
+            }
+        }
+
+        function submitText() {
+            const input = document.getElementById('cmdInput');
+            const val = input.value.trim().toLowerCase();
+            input.value = '';
+
+            if (val === 'phone') alert('Launching Phone...');
+            else if (val === 'messages') alert('Launching Messages...');
+            else if (val === 'spotify') alert('Launching Spotify...');
+            else if (val === 'weather') alert('Launching Weather...');
+            else if (val === 'maps') alert('Launching Maps...');
+            else if (val === 'camera') alert('Launching Camera...');
+            else if (val === 'settings') alert('Launching Settings...');
+            else if (val !== '') alert('Searching / Executing: ' + val);
+            
+            isQwertyMode = false;
+            document.getElementById('qwertyPanel').classList.add('hidden');
+            document.getElementById('numpadPanel').classList.remove('hidden');
+            document.getElementById('toggleBtn').innerText = 'ABC';
+        }
+    </script>
+
+</body>
+</html>
